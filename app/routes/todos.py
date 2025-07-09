@@ -15,7 +15,7 @@ todos = [
 ]
 
 class Todo(BaseModel):
-    id:str 
+    id:Optional[str] 
     title: str
     description: Optional[str] = None
     completed: bool = False
