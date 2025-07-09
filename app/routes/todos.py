@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
+from app.auth import authenticate
 
-app = FastAPI()
+router = APIRouter()
 
 
 # fake data
@@ -19,29 +20,27 @@ class Todo(BaseModel):
     description: Optional[str] = None
     completed: bool = False
 
-@app.get("/")
-async def root():
-    return {"message": "Hello, Todo API !"}
 
-@app.get("/todos", response_model=List[Todo])
-async def get_todos():
+
+@router.get("/todos", response_model=List[Todo])
+async def get_todos(_: str = Depends(authenticate)):
     return todos
 
-@app.get("/todos/{todo_id}", response_model=Todo)
-async def get_todo(todo_id: str ):
+@router.get("/todos/{todo_id}", response_model=Todo)
+async def get_todo(todo_id: str ,_: str = Depends(authenticate) ):
     todo = next(filter(lambda t: t["id"] == todo_id, todos), None)
     if todo:
         return todo
     raise HTTPException(status_code=404, detail="Todo not found")
 
-@app.post("/todos", response_model=Todo, status_code=201)
-async def create_todo(todo: Todo):
+@router.post("/todos", response_model=Todo, status_code=201)
+async def create_todo(todo: Todo,_: str = Depends(authenticate)):
     todo.id = str(uuid.uuid4()) 
     todos.append(todo.dict())
     return todo
 
-@app.put("/todos/{todo_id}", response_model=Todo)
-async def update_todo(todo_id: str , updated_todo: Todo):
+@router.put("/todos/{todo_id}", response_model=Todo)
+async def update_todo(todo_id: str , updated_todo: Todo, _: str = Depends(authenticate)):
     todo = next(filter(lambda t: t["id"] == todo_id, todos), None)
     if todo:
         idx = todos.index(todo)
@@ -51,8 +50,8 @@ async def update_todo(todo_id: str , updated_todo: Todo):
         return updated
     raise HTTPException(status_code=404, detail="Todo not found")
 
-@app.delete("/todos/{todo_id}", status_code=204)
-async def delete_todo(todo_id:str ):
+@router.delete("/todos/{todo_id}", status_code=204)
+async def delete_todo(todo_id:str , _: str = Depends(authenticate) ):
     todo = next(filter(lambda t: t["id"] == todo_id, todos), None)
     if todo:
         todos.remove(todo)
