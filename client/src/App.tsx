@@ -117,10 +117,10 @@ function App() {
       ) : null}
       <div>
         <h2>Todos</h2>
-        <div >
+        <div>
           {todos.data.map((todo: any) => (
-            <div className="card col-6" key={todo.id}>
-              <h3 className="">{todo.title}</h3>
+            <div className="card" key={todo.id}>
+              <h3>{todo.title}</h3>
               <p>{todo.description}</p>
               <p>
                 <b>Status:</b> {todo.completed ? "Completed" : "Pending"}
